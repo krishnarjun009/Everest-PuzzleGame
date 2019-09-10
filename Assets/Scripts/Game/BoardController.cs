@@ -1,4 +1,5 @@
 ﻿using Iniectio.Lite;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -34,11 +35,13 @@ namespace Everest.PuzzleGame
         public override void OnRegister()
         {
             m_OnDragSignal.AddListener(OnDragInsideGrid);
+            grid.onShuffle += OnShuffleTiles;
         }
 
         public override void OnRemove()
         {
             m_OnDragSignal.RemoveListener(OnDragInsideGrid);
+            grid.onShuffle -= OnShuffleTiles;
         }
 
         #endregion
@@ -62,7 +65,6 @@ namespace Everest.PuzzleGame
 
         public void InitBoardGame()
         {
-            grid.Init();
             LoadResources();
             SetupTiles();
         }
@@ -87,7 +89,8 @@ namespace Everest.PuzzleGame
                     CreateGridTile(i, size - 1, -1, true);
             }
 
-            //grid.Shuffle();
+            //shuffle all tiles at final step
+            grid.Shuffle();
         }
 
         private void CreateGridTile(int row, int col, int value = -1, bool isEmpty = false)
@@ -121,6 +124,11 @@ namespace Everest.PuzzleGame
             return tile;
         }
 
+        private void OnShuffleTiles(ITile firstTile, ITile secondTile)
+        {
+            SwapTilesPosition(firstTile as GridTile, secondTile as GridTile);
+        }
+
         private void OnDragInsideGrid(Vector2 position, SwipeDirection direction)
         {
             TryMoveTile(position, direction);
@@ -141,6 +149,7 @@ namespace Everest.PuzzleGame
                 var tilePosition = gridTile.transform.position;
                 float scaleTileSize = grid.CurrentTileSize * m_RootCanvas.scaleFactor * 0.75f;
 
+                //taking boundaries of rect to detect collision whether touch position is on the tile or not
                 float top = tilePosition.y + scaleTileSize / 2f;
                 float bottom = tilePosition.y - scaleTileSize / 2f;
                 float left = tilePosition.x - scaleTileSize / 2f;
@@ -181,11 +190,12 @@ namespace Everest.PuzzleGame
                     neighbourRow = row;
                     neighbourCol = col + 1;
                     break;
+                case SwipeDirection.Auto:
+                    break;
             }
 
             //Checking if neighbour indices are out of grid bounds or not
-            if (neighbourRow < 0 || neighbourRow > m_GridSize - 1 ||
-                neighbourCol < 0 || neighbourCol > m_GridSize - 1)
+            if (!grid.IsIndicesValid(neighbourRow, neighbourCol))
                 return;
 
             //swapping tiles such as internal data but not visually like position
@@ -196,8 +206,19 @@ namespace Everest.PuzzleGame
 
             var firstTile = tiles.firstTile as GridTile;
             var secondTile = tiles.secondTile as GridTile;
-
             //swapping positions for visual update
+            SwapTilesPosition(firstTile, secondTile);
+        }
+
+        private void HasEmptyNeighbour(int row, int col)
+        {
+            //top neighbour
+            int neighbourRow = row - 1;
+            int neighbourCol = col;
+        }
+
+        private void SwapTilesPosition(GridTile firstTile, GridTile secondTile)
+        {
             var temp = firstTile.transform.position;
             firstTile.transform.position = secondTile.transform.position;
             secondTile.transform.position = temp;

@@ -11,10 +11,11 @@ namespace Everest.PuzzleGame
         Left,
         Right,
         Top,
-        Bottom
+        Bottom,
+        Auto
     }
 
-    public class BoardInputController : View, IDragHandler, IBeginDragHandler, IEndDragHandler
+    public class BoardInputController : View, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerClickHandler, IPointerUpHandler
     {
         [Inject] private OnDragSignal m_OnDragSignal { get; set; }
 
@@ -23,6 +24,7 @@ namespace Everest.PuzzleGame
 
         public void OnBeginDrag(PointerEventData eventData)
         {
+            if (m_BlockInput) return;
             m_LastPosition = eventData.position;
         }
 
@@ -65,8 +67,22 @@ namespace Everest.PuzzleGame
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            m_LastPosition = Vector2.zero;
-            m_BlockInput = false;
+            if (m_BlockInput)
+            {
+                m_LastPosition = Vector2.zero;
+                m_BlockInput = false;
+            }
+        }
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            //m_BlockInput = true;
+           // m_OnDragSignal.Dispatch(eventData.position, SwipeDirection.Auto);
+        }
+
+        public void OnPointerUp(PointerEventData eventData)
+        {
+           // m_BlockInput = false;
         }
     }
 }

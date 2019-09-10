@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
+﻿
 namespace Everest.PuzzleGame
 {
     public struct TileTransform
@@ -29,19 +26,8 @@ namespace Everest.PuzzleGame
         public float Height { get; }
         public float CurrentTileSize { get; private set; }
 
-        public int TileCount
-        {
-            get
-            {
-                if (m_Tiles == null) return 0;
-                return m_Tiles.Length;
-            }
-        }
-
-        public int Length
-        {
-            get => m_Tiles.GetLength(1);
-        }
+        public int TileCount { get => m_Tiles.Length; }
+        public int Length { get => m_Tiles.GetLength(1); }
 
         public PuzzleGrid(int size, float tileSpace, float width, float height)
         {
@@ -51,20 +37,12 @@ namespace Everest.PuzzleGame
             TileSpacing = tileSpace;
             m_Tiles = new TileData[Size, Size];
             m_TilePositions = new TileTransform[Size, Size];
-        }
-
-        public void Init()
-        {
-            // Get the maximum width and height a tile can be for this board without overflowing the container
-            float maxTileWidth = (Width - (Size - 1) * TileSpacing) / Size;
-            float maxTileHeight = (Height - (Size - 1) * TileSpacing) / Size;
-
-            CurrentTileSize = Mathf.Min(maxTileWidth, maxTileHeight);
-            GenerateGrid(Size);
+            Init();
         }
 
         public void AddTile(ITile tile, int expectedRow, int expectedCol)
         {
+            //try throw exception
             var position = GetTilePosition(expectedRow, expectedCol);
             var tileData = new TileData(expectedRow, expectedCol, tile, position.x, position.y);
             m_Tiles[expectedRow, expectedCol] = tileData;
@@ -87,12 +65,18 @@ namespace Everest.PuzzleGame
             return m_TilePositions[row, col];
         }
 
-        public (ITile firstTile, ITile secondTile) SwapTiles(int firstRow, int firstCol, int secondRow, int secondCol)
+        public bool IsIndicesValid(int row, int col)
+        {
+            return ((row >= 0 && row <= Size - 1) &&
+                    (col >= 0 && col <= Size - 1));
+        }
+
+        public (ITile firstTile, ITile secondTile) SwapTiles(int firstRow, int firstCol, int secondRow, int secondCol, bool skip = false)
         {
             var firstTile = m_Tiles[firstRow, firstCol];
             var secondTile = m_Tiles[secondRow, secondCol];
-
-            if (!firstTile.Tile.IsEmpty() && !secondTile.Tile.IsEmpty()) return (null, null);
+            if(!skip)
+                if (!firstTile.Tile.IsEmpty() && !secondTile.Tile.IsEmpty()) return (null, null);
 
             //swap rows
             int temp = firstTile.Row;
@@ -101,8 +85,8 @@ namespace Everest.PuzzleGame
 
             //swap columns
             temp = firstTile.Column;
-            firstTile.SetCurrentRow(secondCol);
-            secondTile.SetCurrentRow(temp);
+            firstTile.SetCurrentColumn(secondCol);
+            secondTile.SetCurrentColumn(temp);
 
             //swap tiles indices in array
             var tempTile = m_Tiles[firstRow, firstCol];
@@ -110,6 +94,37 @@ namespace Everest.PuzzleGame
             m_Tiles[secondRow, secondCol] = tempTile;
 
             return (firstTile.Tile, secondTile.Tile);
+        }
+
+        public void Shuffle()
+        {
+            var random = new System.Random();
+            int lengthRow = m_Tiles.GetLength(1);
+
+            for (int i = m_Tiles.Length - 1; i > 0; i--)
+            {
+                int i0 = i / lengthRow; // first tile row
+                int i1 = i % lengthRow; // first tile column
+
+                int j = random.Next(i + 1); // rndom column index
+                int j0 = j / lengthRow; // second tile row
+                int j1 = j % lengthRow; // second tile column
+
+                //swapping tiles
+                var tiles = SwapTiles(i0, i1, j0, j1, true);
+                //invoking event to update visually in monobehaviours
+                onShuffle?.Invoke(tiles.firstTile, tiles.secondTile);
+            }
+        }
+
+        private void Init()
+        {
+            // Get the maximum width and height a tile can be for this board without overflowing the container
+            float maxTileWidth = (Width - (Size - 1) * TileSpacing) / Size;
+            float maxTileHeight = (Height - (Size - 1) * TileSpacing) / Size;
+
+            CurrentTileSize = GetMinValue(maxTileWidth, maxTileHeight);
+            GenerateGrid(Size);
         }
 
         private TileTransform CalculateGridStartPosition()
@@ -140,27 +155,6 @@ namespace Everest.PuzzleGame
             }
         }
 
-        //the Fisher-Yates algorithm
-        public void Shuffle()
-        {
-            System.Random random = new System.Random();
-            int lengthRow = m_Tiles.GetLength(1);
-
-            for (int i = m_Tiles.Length - 1; i > 0; i--)
-            {
-                int i0 = i / lengthRow;
-                int i1 = i % lengthRow;
-
-                int j = random.Next(i + 1);
-                int j0 = j / lengthRow;
-                int j1 = j % lengthRow;
-
-                var temp = m_Tiles[i0, i1];
-                m_Tiles[i0, i1] = m_Tiles[j0, j1];
-                m_Tiles[j0, j1] = temp;
-                var tiles = SwapTiles(i0, i1, j0, j1);
-                onShuffle?.Invoke(tiles.firstTile, tiles.secondTile);
-            }
-        }
+        private float GetMinValue(float a, float b) => a > b ? b : a;
     }
 }
