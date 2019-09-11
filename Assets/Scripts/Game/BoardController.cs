@@ -1,22 +1,21 @@
 ﻿using Iniectio.Lite;
 using UnityEngine;
-using DG.Tweening;
 
 namespace Everest.PuzzleGame
 {
     public class BoardController : View
     {
-        [Inject] private OnDragSignal m_OnDragSignal { get; set; }
-        [Inject] private GameOverSignal m_GameOverSignal { get; set; }
-        [Inject] private RestartGameSignal m_RestartGameSignal { get; set; }
+        [Inject] private OnDragSignal               m_OnDragSignal { get; set; }
+        [Inject] private GameOverSignal             m_GameOverSignal { get; set; }
+        [Inject] private RestartGameSignal          m_RestartGameSignal { get; set; }
 
-        [SerializeField] private Canvas m_RootCanvas;
-        [SerializeField] private int m_GridSize = 7;
-        [SerializeField] private float m_TileSpacing = 14f;
-        [Header("Others")] [SerializeField] private bool m_UserInit;
+        [SerializeField] private Canvas             m_RootCanvas;
+        [SerializeField] private int                m_GridSize = 7;
+        [SerializeField] private float              m_TileSpacing = 14f;
+        [SerializeField] private bool               m_UserInit;
 
-        private PuzzleGrid m_Grid;
-        private GridTile m_TileTemplate;
+        private PuzzleGrid                          m_Grid;
+        private GridTile                            m_TileTemplate;
 
         private PuzzleGrid grid
         {
@@ -64,7 +63,7 @@ namespace Everest.PuzzleGame
 
         #region Private Methods
 
-        public void InitBoardGame()
+        private void InitBoardGame()
         {
             LoadResources();
             SetupTiles();
@@ -99,7 +98,7 @@ namespace Everest.PuzzleGame
             var tile = SetupTile(isEmpty, value);
             tile.transform.name = row + " - " + col;
             SetTilePositionInGrid(row, col, tile);
-            grid.AddTile(tile, row, col);
+            grid.AddTile(tile, row, col, isEmpty);
         }
 
         private GridTile SetupTile(bool isEmpty, int value = -1)
@@ -126,7 +125,7 @@ namespace Everest.PuzzleGame
             return tile;
         }
 
-        private void OnShuffleTiles(ITile firstTile, ITile secondTile)
+        private void OnShuffleTiles(ITileView firstTile, ITileView secondTile)
         {
             SwapTilesPosition(firstTile as GridTile, secondTile as GridTile);
         }

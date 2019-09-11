@@ -1,37 +1,35 @@
 ﻿
 namespace Everest.PuzzleGame
 {
-    public class TileData
+    public class TileData : ITile
     {
-        public int Row { get; private set; }
-        public int Column { get; private set; }
-        public int ExpectedRow { get; private set; }
-        public int ExpectedColumn { get; private set; }
-        public float X { get; private set; }
-        public float Y { get; private set; }
-        public UnityEngine.Vector2 Position { get; }
-        public ITile Tile { get; private set; }
+        public int          Row { get; private set; }
+        public int          Column { get; private set; }
+        public float        X { get; private set; }
+        public float        Y { get; private set; }
+        public int          ExpectedRow { get;  }
+        public int          ExpectedColumn { get; }
+        public ITileView    Tile { get; }
+        public bool         IsEmpty { get;}
 
-        public TileData(int row, int col, ITile tile, float x, float y)
+        public TileData(int row, int col, ITileView tile, float x, float y, bool isEmpty)
         {
-            this.Row = row;
-            this.Column = col;
-            this.ExpectedRow = row;
-            this.ExpectedColumn = col;
-            this.Tile = tile;
-            this.X = x;
-            this.Y = y;
-            this.Position = new UnityEngine.Vector2(x, y);
+            Row = ExpectedRow = row;
+            Column = ExpectedColumn = col;
+            IsEmpty = isEmpty;
+            Tile = tile;
+            X = x;
+            Y = y;
         }
 
         public void SetCurrentRow(int row)
         {
-            this.Row = row;
+            Row = row;
         }
 
         public void SetCurrentColumn(int col)
         {
-            this.Column = col;
+            Column = col;
         }
 
         public bool IsTileSolved() => (ExpectedRow == Row && ExpectedColumn == Column);

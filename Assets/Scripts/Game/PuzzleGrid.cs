@@ -15,9 +15,9 @@ namespace Everest.PuzzleGame
 
     public class PuzzleGrid
     {
-        public event System.Action<ITile, ITile> onShuffle;
+        public event System.Action<ITileView, ITileView> onShuffle;
 
-        private TileData[,] m_Tiles;
+        private ITile[,] m_Tiles;
         private TileTransform[,] m_TilePositions;
 
         public int Size { get; }
@@ -40,29 +40,34 @@ namespace Everest.PuzzleGame
             Init();
         }
 
-        public void AddTile(ITile tile, int expectedRow, int expectedCol)
+        #region Public Methods
+
+        public void AddTile(ITileView tile, int expectedRow, int expectedCol, bool isEmpty)
         {
             //try throw exception
-            //UnityEngine.Debug.Log("Tile adding at " + expectedRow + " - " + expectedCol);
             var position = GetTilePosition(expectedRow, expectedCol);
-            var tileData = new TileData(expectedRow, expectedCol, tile, position.x, position.y);
+            var tileData = new TileData(expectedRow, expectedCol, tile, position.x, position.y, isEmpty);
             m_Tiles[expectedRow, expectedCol] = tileData;
         }
 
-        public ITile GetTile(int row, int column)
+        public ITileView GetTile(int row, int column)
         {
-            if (row >= Size || column >= Size) return null;
+            if (!IsIndicesValid(row, column))
+                throw new System.IndexOutOfRangeException();
             return m_Tiles[row, column].Tile;
         }
 
-        public TileData GetTileData(int row, int column)
+        public ITile GetTileData(int row, int column)
         {
-            if (row >= Size || column >= Size) return null;
+            if (!IsIndicesValid(row, column))
+                throw new System.IndexOutOfRangeException();
             return m_Tiles[row, column];
         }
 
         public TileTransform GetTilePosition(int row, int col)
         {
+            if (!IsIndicesValid(row, col))
+                throw new System.IndexOutOfRangeException();
             return m_TilePositions[row, col];
         }
 
@@ -75,7 +80,7 @@ namespace Everest.PuzzleGame
         public bool IsTileEmpty(int row, int col)
         {
             if (IsIndicesValid(row, col))
-                return GetTile(row, col).IsEmpty();
+                return GetTileData(row, col).IsEmpty;
             return false;
         }
 
@@ -101,12 +106,12 @@ namespace Everest.PuzzleGame
             return tilesSolved == TileCount;
         }
 
-        public (ITile firstTile, ITile secondTile) SwapTiles(int firstRow, int firstCol, int secondRow, int secondCol, bool skip = false)
+        public (ITileView firstTile, ITileView secondTile) SwapTiles(int firstRow, int firstCol, int secondRow, int secondCol, bool skip = false)
         {
             var firstTile = m_Tiles[firstRow, firstCol];
             var secondTile = m_Tiles[secondRow, secondCol];
             if(!skip)
-                if (!firstTile.Tile.IsEmpty() && !secondTile.Tile.IsEmpty()) return (null, null);
+                if (!firstTile.IsEmpty && !secondTile.IsEmpty) return (null, null);
 
             //swap rows
             int temp = firstTile.Row;
@@ -149,6 +154,10 @@ namespace Everest.PuzzleGame
             }
         }
 
+        #endregion
+
+        #region Private Methods
+
         private void Init()
         {
             // Get the maximum width and height a tile can be for this board without overflowing the container
@@ -161,7 +170,6 @@ namespace Everest.PuzzleGame
         private TileTransform CalculateGridStartPosition()
         {
             float tileSize = CurrentTileSize / 2f;
-            float padding = 14f;
             return new TileTransform((-Width / 2f) + tileSize, (Height / 2f) - tileSize);
         }
 
@@ -188,5 +196,7 @@ namespace Everest.PuzzleGame
         }
 
         private float GetMinValue(float a, float b) => a > b ? b : a;
+
+        #endregion
     }
 }
