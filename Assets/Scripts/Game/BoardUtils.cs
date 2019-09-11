@@ -14,9 +14,16 @@ namespace Everest.PuzzleGame
 
         private static Color32[] colors = new Color32[] {
                 
-            new Color32(251, 133, 98, 255),
-            new Color32(239, 66, 65, 255),
-            new Color32(76, 188, 45, 255),
+            //new Color32(251, 133, 98, 255),
+            //new Color32(239, 66, 65, 255),
+            //new Color32(76, 188, 45, 255),
+
+            new Color32(239, 216, 74, 255),
+            new Color32(238, 137, 74, 255),
+            new Color32(238, 108, 74, 255),
+            new Color32(238, 150, 74, 255),
+            new Color32(238, 74, 81, 255),
+            new Color32(238, 75, 78, 255),
         };
 
         public static Color32 GetRandomColor()
@@ -24,7 +31,7 @@ namespace Everest.PuzzleGame
             return colors[UnityEngine.Random.Range(0, colors.Length)];
         }
 
-        public static Color32 GetDefaultColor() => new Color32(255, 255, 255, 255);
+        public static Color32 GetDefaultColor() => new Color32(217, 217, 217, 255);
 
         public static void Setup(Camera camera)
         {

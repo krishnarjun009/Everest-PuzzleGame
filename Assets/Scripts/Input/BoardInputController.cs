@@ -1,6 +1,4 @@
 ﻿using Iniectio.Lite;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -15,15 +13,20 @@ namespace Everest.PuzzleGame
         Auto
     }
 
-    public class BoardInputController : View, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerClickHandler, IPointerUpHandler
+    public class BoardInputController : View, IPointerUpHandler, IPointerDownHandler
     {
         [Inject] private OnDragSignal m_OnDragSignal { get; set; }
 
         private Vector2 m_LastPosition;
         private bool m_BlockInput = false;
+        private bool m_DragStart = false;
+
+        /*
 
         public void OnBeginDrag(PointerEventData eventData)
         {
+            m_DragStart = true;
+            m_BlockInput = false;
             if (m_BlockInput) return;
             m_LastPosition = eventData.position;
         }
@@ -72,17 +75,27 @@ namespace Everest.PuzzleGame
                 m_LastPosition = Vector2.zero;
                 m_BlockInput = false;
             }
+            m_DragStart = false;
         }
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            //m_BlockInput = true;
-           // m_OnDragSignal.Dispatch(eventData.position, SwipeDirection.Auto);
+            if (m_DragStart) return;            
+            m_OnDragSignal.Dispatch(eventData.position, SwipeDirection.Auto);
         }
+
+    */
 
         public void OnPointerUp(PointerEventData eventData)
         {
-           // m_BlockInput = false;
+            //if (m_DragStart) return;
+            m_BlockInput = false;
+        }
+
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            m_BlockInput = true;
+            m_OnDragSignal.Dispatch(eventData.position, SwipeDirection.Auto);
         }
     }
 }

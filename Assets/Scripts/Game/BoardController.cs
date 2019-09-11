@@ -1,13 +1,14 @@
 ﻿using Iniectio.Lite;
-using System;
-using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 namespace Everest.PuzzleGame
 {
     public class BoardController : View
     {
         [Inject] private OnDragSignal m_OnDragSignal { get; set; }
+        [Inject] private GameOverSignal m_GameOverSignal { get; set; }
+        [Inject] private RestartGameSignal m_RestartGameSignal { get; set; }
 
         [SerializeField] private Canvas m_RootCanvas;
         [SerializeField] private int m_GridSize = 7;
@@ -96,6 +97,7 @@ namespace Everest.PuzzleGame
         private void CreateGridTile(int row, int col, int value = -1, bool isEmpty = false)
         {
             var tile = SetupTile(isEmpty, value);
+            tile.transform.name = row + " - " + col;
             SetTilePositionInGrid(row, col, tile);
             grid.AddTile(tile, row, col);
         }
@@ -165,6 +167,13 @@ namespace Everest.PuzzleGame
                     break;
                 }
             }
+
+            //validate grid
+            if (grid.IsGridSolved())
+            {
+                Debug.Log("Grid Solved");
+                m_GameOverSignal.Dispatch();
+            }
         }
 
         private void TrySwipe(int row, int col, SwipeDirection direction)
@@ -191,6 +200,9 @@ namespace Everest.PuzzleGame
                     neighbourCol = col + 1;
                     break;
                 case SwipeDirection.Auto:
+                    var neighbours = HasEmptyNeighbour(row, col);
+                    neighbourRow = neighbours.neighbourRow;
+                    neighbourCol = neighbours.neighbourCol;
                     break;
             }
 
@@ -210,18 +222,46 @@ namespace Everest.PuzzleGame
             SwapTilesPosition(firstTile, secondTile);
         }
 
-        private void HasEmptyNeighbour(int row, int col)
+        private (int neighbourRow, int neighbourCol) HasEmptyNeighbour(int row, int col)
         {
             //top neighbour
             int neighbourRow = row - 1;
             int neighbourCol = col;
+            if (grid.IsTileEmpty(neighbourRow, neighbourCol))
+                return (neighbourRow, neighbourCol);
+            //bottom neighbour
+            neighbourRow = row + 1;
+            neighbourCol = col;
+            if (grid.IsTileEmpty(neighbourRow, neighbourCol))
+                return (neighbourRow, neighbourCol);
+            //left neighbour
+            neighbourRow = row;
+            neighbourCol = col - 1;
+            if (grid.IsTileEmpty(neighbourRow, neighbourCol))
+                return (neighbourRow, neighbourCol);
+            //right neighbour
+            neighbourRow = row;
+            neighbourCol = col + 1;
+            if (grid.IsTileEmpty(neighbourRow, neighbourCol))
+                return (neighbourRow, neighbourCol);
+            return (-1, -1);
         }
 
         private void SwapTilesPosition(GridTile firstTile, GridTile secondTile)
         {
+           // var t1 = firstTile;
+           // var t2 = secondTile;
             var temp = firstTile.transform.position;
+           // t1.rectTransform.DOMove(secondTile.transform.position, 0.35f);
+            //t2.rectTransform.DOMove(temp, 0.35f);
             firstTile.transform.position = secondTile.transform.position;
             secondTile.transform.position = temp;
+          ///  var sequence = DOTween.Sequence();
+            //sequence.Append(firstTile.rectTransform.DOMove(secondTile.transform.position, 0.35f)).
+            //         Append(secondTile.rectTransform.DOMove(firstTile.transform.position, 0.35f)).
+            //         OnComplete(() => {
+                        
+            //         });
         }
 
         #endregion

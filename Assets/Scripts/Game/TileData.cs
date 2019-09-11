@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Everest.PuzzleGame
 {
     public class TileData
@@ -17,18 +12,10 @@ namespace Everest.PuzzleGame
         public UnityEngine.Vector2 Position { get; }
         public ITile Tile { get; private set; }
 
-        public TileData(int row, int col, GridTile tile, float x, float y)
-        {
-            this.ExpectedRow = row;
-            this.ExpectedColumn = col;
-            this.Tile = tile;
-            this.X = x;
-            this.Y = y;
-            this.Position = new UnityEngine.Vector2(x, y);
-        }
-
         public TileData(int row, int col, ITile tile, float x, float y)
         {
+            this.Row = row;
+            this.Column = col;
             this.ExpectedRow = row;
             this.ExpectedColumn = col;
             this.Tile = tile;
@@ -46,5 +33,7 @@ namespace Everest.PuzzleGame
         {
             this.Column = col;
         }
+
+        public bool IsTileSolved() => (ExpectedRow == Row && ExpectedColumn == Column);
     }
 }

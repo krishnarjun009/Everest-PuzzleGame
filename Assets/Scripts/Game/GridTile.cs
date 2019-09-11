@@ -80,5 +80,10 @@ namespace Everest.PuzzleGame
         }
 
         public bool IsEmpty() => m_Empty;
+
+        public bool IsTileSolved()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

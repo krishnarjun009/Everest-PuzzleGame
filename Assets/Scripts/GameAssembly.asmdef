@@ -1,3 +1,14 @@
-﻿{
-	"name": "GameAssembly"
+{
+    "name": "GameAssembly",
+    "references": [
+        "GUID:b18c66aaf0b21654793c48af418dfe74"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
 }

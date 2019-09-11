@@ -43,6 +43,7 @@ namespace Everest.PuzzleGame
         public void AddTile(ITile tile, int expectedRow, int expectedCol)
         {
             //try throw exception
+            //UnityEngine.Debug.Log("Tile adding at " + expectedRow + " - " + expectedCol);
             var position = GetTilePosition(expectedRow, expectedCol);
             var tileData = new TileData(expectedRow, expectedCol, tile, position.x, position.y);
             m_Tiles[expectedRow, expectedCol] = tileData;
@@ -69,6 +70,35 @@ namespace Everest.PuzzleGame
         {
             return ((row >= 0 && row <= Size - 1) &&
                     (col >= 0 && col <= Size - 1));
+        }
+
+        public bool IsTileEmpty(int row, int col)
+        {
+            if (IsIndicesValid(row, col))
+                return GetTile(row, col).IsEmpty();
+            return false;
+        }
+
+        public bool IsGridSolved()
+        {
+            int tilesSolved = 0;
+            bool possible = true;
+            for(int i = 0; i < Size; i++)
+            {
+                for(int j = 0; j < Size; j++)
+                {
+                    if (GetTileData(i, j).IsTileSolved())
+                        tilesSolved++;
+                    else
+                    {
+                        possible = false;
+                        break;
+                    }
+                }
+                if (!possible) break;
+            }
+
+            return tilesSolved == TileCount;
         }
 
         public (ITile firstTile, ITile secondTile) SwapTiles(int firstRow, int firstCol, int secondRow, int secondCol, bool skip = false)
@@ -106,6 +136,8 @@ namespace Everest.PuzzleGame
                 int i0 = i / lengthRow; // first tile row
                 int i1 = i % lengthRow; // first tile column
 
+                //int j0 = UnityEngine.Random.Range(0, Size);
+                //int j1 = UnityEngine.Random.Range(0, Size); ;
                 int j = random.Next(i + 1); // rndom column index
                 int j0 = j / lengthRow; // second tile row
                 int j1 = j % lengthRow; // second tile column
@@ -122,7 +154,6 @@ namespace Everest.PuzzleGame
             // Get the maximum width and height a tile can be for this board without overflowing the container
             float maxTileWidth = (Width - (Size - 1) * TileSpacing) / Size;
             float maxTileHeight = (Height - (Size - 1) * TileSpacing) / Size;
-
             CurrentTileSize = GetMinValue(maxTileWidth, maxTileHeight);
             GenerateGrid(Size);
         }
@@ -130,12 +161,13 @@ namespace Everest.PuzzleGame
         private TileTransform CalculateGridStartPosition()
         {
             float tileSize = CurrentTileSize / 2f;
+            float padding = 14f;
             return new TileTransform((-Width / 2f) + tileSize, (Height / 2f) - tileSize);
         }
 
         private void GenerateGrid(int size)
         {
-            float offset = CurrentTileSize + TileSpacing;
+            float offset = CurrentTileSize + TileSpacing ;
             int lengthRow = m_Tiles.GetLength(1);
             var start = CalculateGridStartPosition();
             float x = start.x;

@@ -12,6 +12,8 @@ namespace Iniectio.Lite
 		public override void mapBindings()
 		{
             injectionBinder.Map<OnDragSignal>().ToSingle();
+            injectionBinder.Map<GameOverSignal>().ToSingle();
+            injectionBinder.Map<RestartGameSignal>().ToSingle();
         }
 	}
 }
