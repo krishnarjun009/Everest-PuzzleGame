@@ -17,17 +17,18 @@ namespace Everest.PuzzleGame
     {
         public event System.Action<ITileView, ITileView> onShuffle;
 
-        private ITile[,] m_Tiles;
-        private TileTransform[,] m_TilePositions;
+        private ITile[,]                        m_Tiles;
+        private TileTransform[,]                m_TilePositions;
 
-        public int Size { get; }
-        public float TileSpacing { get; }
-        public float Width { get; }
-        public float Height { get; }
-        public float CurrentTileSize { get; private set; }
+        public int                              Size { get; }
+        public float                            TileSpacing { get; }
+        public float                            Width { get; }
+        public float                            Height { get; }
+        public float                            CurrentTileSize { get; private set; }
 
         public int TileCount { get => m_Tiles.Length; }
         public int Length { get => m_Tiles.GetLength(1); }
+
         public int ActiveTileCount
         {
             get
@@ -152,7 +153,7 @@ namespace Everest.PuzzleGame
             var random = new System.Random();
             int lengthRow = m_Tiles.GetLength(1);
 
-            for (int i = m_Tiles.Length - 1; i > 0; i--)
+            for (int i = TileCount - 1; i > 0; i--)
             {
                 int i0 = i / lengthRow; // first tile row
                 int i1 = i % lengthRow; // first tile column
@@ -196,7 +197,7 @@ namespace Everest.PuzzleGame
             var start = CalculateGridStartPosition();
             float x = start.x;
 
-            for (int i = 0; i < size * size; i++)
+            for (int i = 0; i < TileCount; i++)
             {
                 int row = i / lengthRow;
                 int col = i % lengthRow;
