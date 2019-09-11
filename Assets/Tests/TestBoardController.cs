@@ -1,37 +1,84 @@
-﻿using System.Collections.Generic;
-using Everest.PuzzleGame;
+﻿using Everest.PuzzleGame;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
 
 namespace Tests
 {
     public class TestBoardController
     {
-        BoardController controller;
-        GridLayoutGroup layout;
+        PuzzleGrid grid;
+        int size = 7;
 
         [SetUp]
         public void Setup()
         {
-            //setting up grid components
-            var grid = new GameObject("BoardController");
-            layout = grid.AddComponent<GridLayoutGroup>();
-            controller = grid.AddComponent<BoardController>();
+            grid = new PuzzleGrid(7, 14f, 900, 900);
         }
 
         [Test]
         public void TestCreateBoard()
         {
-            //initializing board
-            //controller.InitBoardGame();
-
-            //validating board elements count
-            //Assert.Greater(controller.transform.childCount, 0);
+            Assert.AreEqual(grid.TileCount, size * size);
         }
 
+
+        [Test]
+        public void TestIndicesValid()
+        {
+            int row = 0;
+            int col = 0;
+
+            var isValid = grid.IsIndicesValid(row, col);
+
+            Assert.AreEqual(isValid, true);
+        }
+
+        [Test]
+        public void TestIndicesAreNotValid()
+        {
+            int row = 0;
+            int col = -1;
+
+            var isValid = grid.IsIndicesValid(row, col);
+
+            Assert.AreNotEqual(isValid, true);
+        }
+
+        [Test]
+        public void TestAddTile()
+        {
+            AddTile(0, 0);
+            Assert.AreEqual(grid.ActiveTileCount, 1);
+        }
+
+        [Test]
+        public void TestSwapTile()
+        {
+            AddTile(0, 0);
+            AddTile(0, 1);
+
+            var beforeSwapTile0 = grid.GetTileData(0, 0);
+            var beforeSwapTile1 = grid.GetTileData(0, 1);
+            var tiles = grid.SwapTiles(0, 0, 0, 1, true);
+
+            Assert.IsNotNull(tiles.firstTile);
+            Assert.IsNotNull(tiles.secondTile);
+
+            var afterSwapTile0 = grid.GetTileData(0, 0);
+            var afterSwapTile1 = grid.GetTileData(0, 1);
+
+            Assert.AreSame(beforeSwapTile0, afterSwapTile1);
+            Assert.AreSame(beforeSwapTile1, afterSwapTile0);
+        }
+
+        public void AddTile(int row, int col)
+        {
+            var template = Resources.Load<GridTile>("Prefabs/GridTile");
+            var view = MonoBehaviour.Instantiate<GridTile>(template);
+            view.transform.name = row + " = " + col;
+
+            grid.AddTile(view, row, col, false);
+        }
         //[Test]
         //public void TestSwipeLeftGuesture()
         //{

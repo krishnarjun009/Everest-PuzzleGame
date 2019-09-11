@@ -28,6 +28,22 @@ namespace Everest.PuzzleGame
 
         public int TileCount { get => m_Tiles.Length; }
         public int Length { get => m_Tiles.GetLength(1); }
+        public int ActiveTileCount
+        {
+            get
+            {
+                int count = 0;
+                for (int i = 0; i < Size; i++)
+                {
+                    for (int j = 0; j < Size; j++)
+                    {
+                        if (GetTileData(i, j) != null)
+                            count++;
+                    }
+                }
+                return count;
+            }
+        }
 
         public PuzzleGrid(int size, float tileSpace, float width, float height)
         {
@@ -110,8 +126,8 @@ namespace Everest.PuzzleGame
         {
             var firstTile = m_Tiles[firstRow, firstCol];
             var secondTile = m_Tiles[secondRow, secondCol];
-            if(!skip)
-                if (!firstTile.IsEmpty && !secondTile.IsEmpty) return (null, null);
+
+            if (!skip && !firstTile.IsEmpty && !secondTile.IsEmpty) return (null, null);
 
             //swap rows
             int temp = firstTile.Row;
