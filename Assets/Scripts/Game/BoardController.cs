@@ -1,5 +1,7 @@
 ﻿using Iniectio.Lite;
 using UnityEngine;
+using DG.Tweening;
+using System.Collections;
 
 namespace Everest.PuzzleGame
 {
@@ -8,6 +10,7 @@ namespace Everest.PuzzleGame
         [Inject] private OnDragSignal               m_OnDragSignal { get; set; }
         [Inject] private GameOverSignal             m_GameOverSignal { get; set; }
         [Inject] private RestartGameSignal          m_RestartGameSignal { get; set; }
+        [Inject] private GameUpdateSignal           m_GameUpdateSignal { get; set; }
 
         [SerializeField] private Canvas             m_RootCanvas;
         [SerializeField] private int                m_GridSize = 7;
@@ -36,12 +39,14 @@ namespace Everest.PuzzleGame
         {
             m_OnDragSignal.AddListener(OnDragInsideGrid);
             grid.onShuffle += OnShuffleTiles;
+            grid.onShffleComplete += OnShuffleCompleted;
         }
 
         public override void OnRemove()
         {
             m_OnDragSignal.RemoveListener(OnDragInsideGrid);
             grid.onShuffle -= OnShuffleTiles;
+            grid.onShffleComplete -= OnShuffleCompleted;
         }
 
         #endregion
@@ -62,6 +67,12 @@ namespace Everest.PuzzleGame
         #endregion
 
         #region Private Methods
+
+        [Listen(typeof(SetupBoardSignal))]
+        private void OnGameStart()
+        {
+            InitBoardGame();
+        }
 
         private void InitBoardGame()
         {
@@ -218,7 +229,9 @@ namespace Everest.PuzzleGame
             var firstTile = tiles.firstTile as GridTile;
             var secondTile = tiles.secondTile as GridTile;
             //swapping positions for visual update
-            SwapTilesPosition(firstTile, secondTile);
+            SwapTilesWithAnim(firstTile, secondTile);
+            m_GameUpdateSignal.Dispatch();
+            //SwapTilesPosition(firstTile, secondTile);
         }
 
         private (int neighbourRow, int neighbourCol) HasEmptyNeighbour(int row, int col)
@@ -246,22 +259,73 @@ namespace Everest.PuzzleGame
             return (-1, -1);
         }
 
+        Sequence sequence;
+        System.Collections.Generic.Stack<Sequence> tweens = new System.Collections.Generic.Stack<Sequence>();
+
+        IEnumerator WaitForTweenCompletion(Sequence seq)
+        {
+            seq.Play();
+            yield return seq.WaitForKill();
+            Debug.Log("Tween completed");
+            yield return new WaitForEndOfFrame();
+            //OnShuffleCompleted();
+        }
+
+        private void OnShuffleCompleted()
+        {
+            if (tweens.Count == 0) return;
+            var seq = tweens.Pop();
+            StartCoroutine(WaitForTweenCompletion(seq));
+        }
+
+        private void SwapTilesWithAnim(GridTile firstTile, GridTile secondTile)
+        {
+            if(sequence == null)
+                sequence = DOTween.Sequence();
+
+            //Debug.Log(firstTile.transform.name + " = " + firstTile.transform.position);
+            //Debug.Log(secondTile.transform.name + " = " + secondTile.transform.position);
+            sequence.Insert(0f, firstTile.rectTransform.DOMove(secondTile.transform.position, 0.35f)).
+                Insert(0f, secondTile.rectTransform.DOMove(firstTile.transform.position, 0.35f)).Play();
+
+        }
+
         private void SwapTilesPosition(GridTile firstTile, GridTile secondTile)
         {
-           // var t1 = firstTile;
-           // var t2 = secondTile;
             var temp = firstTile.transform.position;
-           // t1.rectTransform.DOMove(secondTile.transform.position, 0.35f);
-            //t2.rectTransform.DOMove(temp, 0.35f);
             firstTile.transform.position = secondTile.transform.position;
             secondTile.transform.position = temp;
-          ///  var sequence = DOTween.Sequence();
-            //sequence.Append(firstTile.rectTransform.DOMove(secondTile.transform.position, 0.35f)).
-            //         Append(secondTile.rectTransform.DOMove(firstTile.transform.position, 0.35f)).
-            //         OnComplete(() => {
-                        
-            //         });
+
+
+            //if (firstTile.transform.name == secondTile.transform.name) return;
+            //var sequence = DOTween.Sequence();
+
+            //Debug.Log(firstTile.transform.name + " = " + firstTile.transform.position);
+            //Debug.Log(secondTile.transform.name + " = " + secondTile.transform.position);
+            //sequence.Pause().Append(firstTile.rectTransform.DOMove(secondTile.transform.position, 0.35f).Pause()).
+            //    Append(secondTile.rectTransform.DOMove(firstTile.transform.position, 0.35f).Pause());
+
+            //tweens.Push(sequence);
+
+            //OnShuffleCompleted();
+
+           // StartCoroutine(WaitForTweenCompletion(firstTile, secondTile));
+
+            ////t1.rectTransform.DOKill();
+            ////t2.rectTransform.DOKill();
+            //firstTile.rectTransform.DOMove(tem2, 0.35f).OnComplete(() => {
+
+
+            //});
+
+            //secondTile.rectTransform.DOMove(temp, 0.35f).OnComplete(() => {
+
+
+            //});
+
         }
+
+        
 
         #endregion
     }

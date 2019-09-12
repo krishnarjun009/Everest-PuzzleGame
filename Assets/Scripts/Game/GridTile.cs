@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 namespace Everest.PuzzleGame
 {
@@ -9,6 +10,7 @@ namespace Everest.PuzzleGame
 
         private Image                   m_Image;
         private RectTransform           m_RectTransform;
+
 
         private Image image
         {
@@ -30,7 +32,15 @@ namespace Everest.PuzzleGame
 
         public void SetView(int value)
         {
+            rectTransform.localScale = new Vector3(0f, 0f, 0f);
             m_ValueText.text = value.ToString();
+        }
+
+        public void SetRelative()
+        {
+            var width = rectTransform.rect.width;
+            var height = rectTransform.rect.height;
+
         }
 
         public void SetColor(Color color)
@@ -46,11 +56,19 @@ namespace Everest.PuzzleGame
         public void SetActive(bool active)
         {
             gameObject.SetActive(active);
+            if(active)
+                PlayTween();
         }
 
         internal void SetEmpty()
         {
+            rectTransform.localScale = new Vector3(0f, 0f, 0f);
             m_ValueText.gameObject.SetActive(false);
+        }
+
+        private void PlayTween()
+        {
+            rectTransform.DOScale(1f, 0.35f).SetDelay(0.25f);
         }
     }
 }

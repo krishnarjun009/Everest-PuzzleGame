@@ -16,6 +16,7 @@ namespace Everest.PuzzleGame
     public class PuzzleGrid
     {
         public event System.Action<ITileView, ITileView> onShuffle;
+        public event System.Action onShffleComplete;
 
         private ITile[,]                        m_Tiles;
         private TileTransform[,]                m_TilePositions;
@@ -169,6 +170,8 @@ namespace Everest.PuzzleGame
                 //invoking event to update visually in monobehaviours
                 onShuffle?.Invoke(tiles.firstTile, tiles.secondTile);
             }
+
+            onShffleComplete?.Invoke();
         }
 
         #endregion
@@ -177,17 +180,20 @@ namespace Everest.PuzzleGame
 
         private void Init()
         {
+            float padding = 10f;
             // Get the maximum width and height a tile can be for this board without overflowing the container
-            float maxTileWidth = (Width - (Size - 1) * TileSpacing) / Size;
-            float maxTileHeight = (Height - (Size - 1) * TileSpacing) / Size;
+            float maxTileWidth = (Width - (Size - 1) * TileSpacing - (4 * padding)) / Size;
+            float maxTileHeight = (Height - (Size - 1) * TileSpacing - (4 * padding)) / Size;
             CurrentTileSize = GetMinValue(maxTileWidth, maxTileHeight);
             GenerateGrid(Size);
         }
 
         private TileTransform CalculateGridStartPosition()
         {
+            float padding = 10f;
+            //finding top-left corner as the grid tile start position
             float tileSize = CurrentTileSize / 2f;
-            return new TileTransform((-Width / 2f) + tileSize, (Height / 2f) - tileSize);
+            return new TileTransform((-Width / 2f) + tileSize + padding * 2, (Height / 2f) - tileSize - padding * 2);
         }
 
         private void GenerateGrid(int size)
