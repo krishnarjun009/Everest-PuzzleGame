@@ -311,7 +311,7 @@ namespace Iniectio.Lite
 
         public void RemoveListener(Action callback)
         {
-            if (callback != null && listener.GetInvocationList().Contains(callback))
+            if (callback != null && listener != null && listener.GetInvocationList().Contains(callback))
             {
                 listener -= callback;
             }

@@ -1,29 +1,27 @@
 ﻿using Iniectio.Lite;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 namespace Everest.PuzzleGame
 {
     public class SavePlayerDetailsCommand : Command<string>
     {
-        [Inject] private LoadPlayerResponseSignal loadPlayerResponseSignal { get; set; }
-        [Inject] private IGameUserService gameUserService { get; set; }
-        [Inject] private IPlayer player { get; set; }
+        [Inject] private LoadPlayerResponseSignal       loadPlayerResponseSignal { get; set; }
+        [Inject] private IGameUserService               gameUserService { get; set; }
+        [Inject] private IPlayer                        player { get; set; }
 
         public override void Execute(string userName)
         {
-            Debug.Log("user " + player.UserName);
+            //Debug.Log("Calling---------------");
             player.UpdateUserName(userName);
+            //Debug.Log("user " + player.UserName);
             gameUserService.SavePlayer(userName, player.GetSerializableData(), (username, data) => {
 
-                PlayerPrefs.SetString("UserName", username);
-                if(player.UserName == "Guest")
-                    player.Init(data);
+                UnityEngine.PlayerPrefs.SetString("UserName", username);
+                //Debug.Log(data.UserName);
+                player.Init(data);
 
-                loadPlayerResponseSignal.Dispatch();
-
-            }, null);
+            }, (ex) => {
+                //Debug.Log(ex.Message);
+            });
         }
     }
 }
