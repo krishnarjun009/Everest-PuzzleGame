@@ -11,8 +11,9 @@ namespace Everest.PuzzleGame
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            if(!m_BlockInput)
-                m_OnDragSignal.Dispatch(eventData.position);
+            if (m_BlockInput) return;
+            m_BlockInput = true;
+            m_OnDragSignal.Dispatch(eventData.position);
         }
 
         [Listen(typeof(EnableInputSignal))]

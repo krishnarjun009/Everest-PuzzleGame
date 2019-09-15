@@ -210,6 +210,7 @@ namespace Everest.PuzzleGame
             }
 
             if (grid.IsGridSolved()) m_GameOverRequestSignal.Dispatch();
+            else m_EnableInputSignal.Dispatch();
         }
 
         private void TrySwipe(int row, int col)
@@ -244,11 +245,9 @@ namespace Everest.PuzzleGame
 
         private void SwapTilesWithAnim(GridTile firstTile, GridTile secondTile)
         {
-            if(m_Sequence == null)
-                m_Sequence = DOTween.Sequence();
-
-            m_Sequence.Insert(0f, firstTile.rectTransform.DOMove(secondTile.transform.position, 0.35f)).
-                Insert(0f, secondTile.rectTransform.DOMove(firstTile.transform.position, 0.35f)).Play().
+            var sequence = DOTween.Sequence();
+            sequence.Insert(0f, firstTile.rectTransform.DOMove(secondTile.transform.position, 0.25f)).
+                Insert(0f, secondTile.rectTransform.DOMove(firstTile.transform.position, 0.25f)).
                 OnComplete(() => {
                     m_EnableInputSignal.Dispatch();
                 });
