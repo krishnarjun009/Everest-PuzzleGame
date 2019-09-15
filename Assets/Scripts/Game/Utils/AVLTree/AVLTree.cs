@@ -1,17 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Everest.PuzzleGame
 {
-    // An AVL tree node 
     public class Node
     {
         public int key, height;
         public Node left, right;
-        public int size; // size of the tree rooted with this Node 
+        public int size;
     };
 
     public class AVLTree
@@ -36,19 +31,15 @@ namespace Everest.PuzzleGame
             Node x = node.left;
             Node T2 = x.right;
 
-            // Perform rotation 
             x.right = node;
             node.left = T2;
 
-            // Update heights 
             node.height = Math.Max(GetNodeHeight(node.left), GetNodeHeight(node.right)) + 1;
             x.height = Math.Max(GetNodeHeight(x.left), GetNodeHeight(x.right)) + 1;
 
-            // Update sizes 
             node.size = GetNodeSize(node.left) + GetNodeSize(node.right) + 1;
             x.size = GetNodeSize(x.left) + GetNodeSize(x.right) + 1;
 
-            // Return new root 
             return x;
         }
 
@@ -57,23 +48,18 @@ namespace Everest.PuzzleGame
             Node y = x.right;
             Node T2 = y.left;
 
-            // Perform rotation 
             y.left = x;
             x.right = T2;
 
-            //  Update heights 
             x.height = Math.Max(GetNodeHeight(x.left), GetNodeHeight(x.right)) + 1;
             y.height = Math.Max(GetNodeHeight(y.left), GetNodeHeight(y.right)) + 1;
 
-            // Update sizes 
             x.size = GetNodeSize(x.left) + GetNodeSize(x.right) + 1;
             y.size = GetNodeSize(y.left) + GetNodeSize(y.right) + 1;
 
-            // Return new root 
             return y;
         }
 
-        // Get Balance factor of Node N 
         private int GetBalanceFactor(Node N)
         {
             if (N == null)
@@ -99,41 +85,30 @@ namespace Everest.PuzzleGame
                 node.right = Insert(node.right, key, out result);
             }
 
-            /* 2. Update height and size of this ancestor node */
             node.height = Math.Max(GetNodeHeight(node.left),
                                GetNodeHeight(node.right)) + 1;
             node.size = GetNodeSize(node.left) + GetNodeSize(node.right) + 1;
 
-            /* 3. Get the balance factor of this ancestor node to 
-                  check whether this node became unbalanced */
             int balance = GetBalanceFactor(node);
 
-            // If this node becomes unbalanced, then there are 
-            // 4 cases 
-
-            // Left Left Case 
             if (balance > 1 && key < node.left.key)
                 return RotateRight(node);
 
-            // Right Right Case 
             if (balance < -1 && key > node.right.key)
                 return RotateLeft(node);
 
-            // Left Right Case 
             if (balance > 1 && key > node.left.key)
             {
                 node.left = RotateLeft(node.left);
                 return RotateRight(node);
             }
 
-            // Right Left Case 
             if (balance < -1 && key < node.right.key)
             {
                 node.right = RotateRight(node.right);
                 return RotateLeft(node);
             }
 
-            /* return the (unchanged) node pointer */
             return node;
         }
 

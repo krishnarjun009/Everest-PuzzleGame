@@ -28,8 +28,6 @@ namespace Everest.PuzzleGame
         {
             base.Start();
             m_LoadPlayerRequestSignal.Dispatch(PlayerPrefs.GetString("UserName", "Guest"));
-
-            //m_SaveUserInLeaderBoardRequestSignal.Dispatch();//test
         }
 
         [Listen(typeof(LoadPlayerResponseSignal))]

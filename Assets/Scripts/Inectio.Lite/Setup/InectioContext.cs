@@ -31,6 +31,7 @@ namespace Iniectio.Lite
             commandBinder.Map<LoadHighScoreRequestSignal, LoadHighScoresCommand>().Pooled();
             commandBinder.Map<LoadPlayerRequestSignal, LoadPlayerDetailsCommand>().Pooled();
             commandBinder.Map<SavePlayerRequestSignal, SavePlayerDetailsCommand>().Pooled();
+            commandBinder.Map<GameOverRequestSignal, GameOverCommand>().Pooled();
         }
 	}
 }

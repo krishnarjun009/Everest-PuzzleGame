@@ -47,8 +47,7 @@ namespace Tests
         [Test]
         public void TestAddTile()
         {
-            AddTile(0, 0);
-            Assert.AreEqual(grid.ActiveTileCount, 1);
+            
         }
 
         [Test]

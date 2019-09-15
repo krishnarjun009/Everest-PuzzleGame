@@ -12,6 +12,8 @@ namespace Everest.PuzzleGame
         [Inject] private GameUpdateSignal                           m_GameUpdateSignal { get; set; }
         [Inject] private SaveUserInLeaderBoardRequestSignal         m_SaveUserInLeaderBoardRequestSignal { get; set; }
         [Inject] private SavePlayerRequestSignal                    m_SavePlayerRequestSignal { get; set; }
+        [Inject] private StartGameSignal                            m_StartGameSignal { get; set; }
+        [Inject] private GameOverRequestSignal                      m_GameOverRequestSignal { get; set; }
         [Inject] private IPlayer                                    m_Player { get; set; }
 
         [SerializeField] private Canvas                             m_RootCanvas;
@@ -42,16 +44,16 @@ namespace Everest.PuzzleGame
         {
             m_OnDragSignal.AddListener(OnInputReceived);
             grid.onShuffle += OnShuffleTiles;
-            grid.onShffleComplete += OnShuffleCompleted;
             grid.onSwap += OnSwipe;
+            grid.onDestroy += OnDestroyGridTile;
         }
 
         public override void OnRemove()
         {
             m_OnDragSignal.RemoveListener(OnInputReceived);
             grid.onShuffle -= OnShuffleTiles;
-            grid.onShffleComplete -= OnShuffleCompleted;
             grid.onSwap -= OnSwipe;
+            grid.onDestroy -= OnDestroyGridTile;
         }
 
         #endregion
@@ -67,15 +69,9 @@ namespace Everest.PuzzleGame
 
         protected override void OnDisable()
         {
-            
             base.OnDisable();
             grid.Destroy();
-            //grid.Disable();
         }
-
-        #endregion
-
-        #region Public Methods
 
         #endregion
 
@@ -90,10 +86,11 @@ namespace Everest.PuzzleGame
         [Listen(typeof(RestartGameSignal))]
         private void OnGameRestart()
         {
-            m_Player.Restart();
             grid.Destroy();
+            m_Player.Clear();
+            m_Player.UpdateTiles(grid.Values);
             m_SavePlayerRequestSignal.Dispatch(m_Player.UserName);
-            InitBoardGame();
+            m_StartGameSignal.Dispatch();
         }
 
         private void InitBoardGame()
@@ -116,9 +113,7 @@ namespace Everest.PuzzleGame
             if (values == null)
             {
                 GenerateBoard();
-
                 grid.Shuffle();
-                grid.TryPuzzleSolvable();
                 m_Player.UpdateTiles(grid.Values);
             }
             else
@@ -127,6 +122,7 @@ namespace Everest.PuzzleGame
                 for(int i = 0; i < values.Length; i++)
                     CreateGridTile(i / lengthRow, i % lengthRow, values[i], values[i] == -1);
             }
+            m_SavePlayerRequestSignal.Dispatch(m_Player.UserName);
         }
 
         private void GenerateBoard()
@@ -139,7 +135,6 @@ namespace Everest.PuzzleGame
 
                 for (int j = 0; j < col; j++)
                     CreateGridTile(i, j, (size * i) + j + 1);
-                //setting up last tile data which should be empty tile
                 if (i == size - 1)
                     CreateGridTile(i, size - 1, -1, true);
             }
@@ -178,11 +173,6 @@ namespace Everest.PuzzleGame
             SwapTilesPosition(firstTile as GridTile, secondTile as GridTile);
         }
 
-        private void OnShuffleCompleted()
-        {
-            //do nothing
-        }
-
         private void OnInputReceived(Vector2 position)
         {
             TryMoveTile(position);
@@ -203,13 +193,11 @@ namespace Everest.PuzzleGame
                 var tilePosition = gridTile.transform.position;
                 float scaleTileSize = grid.CurrentTileSize * m_RootCanvas.scaleFactor * 0.75f;
 
-                //taking boundaries of rect to detect collision whether touch position is on the tile or not
                 float top = tilePosition.y + scaleTileSize / 2f;
                 float bottom = tilePosition.y - scaleTileSize / 2f;
                 float left = tilePosition.x - scaleTileSize / 2f;
                 float right = tilePosition.x + scaleTileSize / 2f;
 
-                // Check if the mouse if over this tile
                 if (dragPosition.x > left &&
                     dragPosition.x < right &&
                     dragPosition.y > bottom &&
@@ -220,14 +208,7 @@ namespace Everest.PuzzleGame
                 }
             }
 
-            //validate grid
-            if (grid.IsGridSolved())
-            {
-                Debug.Log("Grid Solved");
-                m_Player.UpdateBestScore(m_Player.Score);
-                m_SaveUserInLeaderBoardRequestSignal.Dispatch();
-                m_GameOverSignal.Dispatch();
-            }
+            if (grid.IsGridSolved()) m_GameOverRequestSignal.Dispatch();
         }
 
         private void TrySwipe(int row, int col)
@@ -239,7 +220,6 @@ namespace Everest.PuzzleGame
             neighbourRow = neighbours.neighbourRow;
             neighbourCol = neighbours.neighbourCol;
 
-            //Checking if neighbour indices are out of grid bounds or not
             if (!grid.IsIndicesValid(neighbourRow, neighbourCol))
                 return;
             if (!grid.IsTileEmpty(row, col) && !grid.IsTileEmpty(neighbourRow, neighbourCol))
@@ -276,6 +256,8 @@ namespace Everest.PuzzleGame
             firstTile.transform.position = secondTile.transform.position;
             secondTile.transform.position = temp;
         }
+
+        private void OnDestroyGridTile(ITileView tile) => Destroy((tile as GridTile).gameObject);
 
         #endregion
     }

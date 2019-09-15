@@ -60,11 +60,6 @@ namespace Everest.PuzzleGame
                 PlayTween();
         }
 
-        public void Disable()
-        {
-            SetActive(false);
-        }
-
         internal void SetEmpty()
         {
             rectTransform.localScale = new Vector3(0f, 0f, 0f);

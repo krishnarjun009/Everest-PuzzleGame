@@ -41,11 +41,7 @@ namespace Everest.PuzzleGame
         }
 
         [Listen(typeof(GameUpdateSignal))]
-        private void OnUpdate()
-        {
-            //Debug.Log("Calling");
-            m_ScoreText.text = m_Player.Score.ToString();
-        }
+        private void OnUpdate() => m_ScoreText.text = m_Player.Score.ToString();
 
         [Listen(typeof(StartGameSignal))]
         private void OnGameStart()

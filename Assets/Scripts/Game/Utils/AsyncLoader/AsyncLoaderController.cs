@@ -21,7 +21,6 @@ namespace Everest.PuzzleGame
             else
                 asyncLoad = SceneManager.LoadSceneAsync(sceneToLoad, LoadSceneMode.Additive);
 
-            //Wait until the last operation fully loads to return anything
             while (!asyncLoad.isDone)
             {
                 onProgressUpdate?.Invoke((asyncLoad.progress / 0.9f));
@@ -33,7 +32,6 @@ namespace Everest.PuzzleGame
                 yield return new WaitForEndOfFrame();
             }
 
-            //last frame update
             yield return null;
         }
     }

@@ -4,6 +4,7 @@ namespace Everest.PuzzleGame
 {
     public class OnDragSignal : Signal<UnityEngine.Vector2> { }
     public class GameOverSignal : Signal { }
+    public class GameOverRequestSignal : Signal { }
     public class StartGameSignal : Signal { }
     public class RestartGameSignal : Signal { }
     public class LoadPlayerRequestSignal : Signal<string> { }

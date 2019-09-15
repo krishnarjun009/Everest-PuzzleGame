@@ -26,7 +26,7 @@ namespace Everest.PuzzleGame
         void UpdateTiles(int[] values);
         void UpdateScore(int score);
         void UpdateBestScore(int currentScore);
-        void Restart();
+        void Clear();
     }
 
     public class Player : IPlayer
@@ -81,9 +81,8 @@ namespace Everest.PuzzleGame
             GridValues = values;
         }
 
-        public void Restart()
+        public void Clear()
         {
-            GridValues = null;
             Score = 0;
         }
     }
