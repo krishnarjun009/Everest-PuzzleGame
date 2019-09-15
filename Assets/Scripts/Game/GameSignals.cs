@@ -19,4 +19,5 @@ namespace Everest.PuzzleGame
     public class SaveUserInLeaderBoardRequestSignal : Signal { }
     public class LoadHighScoresResponseSignal : Signal<LeaderBoardUserData[]> { }
     public class EnableHighScoresScreenSignal : Signal<bool> { }
+    public class EnableInputSignal : Signal { }
 }

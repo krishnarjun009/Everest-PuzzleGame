@@ -26,6 +26,7 @@ namespace Iniectio.Lite
             injectionBinder.Map<EnableMainMenuSignal>();
             injectionBinder.Map<LoadHighScoresResponseSignal>();
             injectionBinder.Map<EnableHighScoresScreenSignal>();
+            injectionBinder.Map<EnableInputSignal>();
 
             commandBinder.Map<SaveUserInLeaderBoardRequestSignal, SaveUserInLeaderBoardCommand>().Pooled();
             commandBinder.Map<LoadHighScoreRequestSignal, LoadHighScoresCommand>().Pooled();

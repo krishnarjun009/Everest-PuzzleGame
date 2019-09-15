@@ -14,6 +14,7 @@ namespace Everest.PuzzleGame
         [Inject] private SavePlayerRequestSignal                    m_SavePlayerRequestSignal { get; set; }
         [Inject] private StartGameSignal                            m_StartGameSignal { get; set; }
         [Inject] private GameOverRequestSignal                      m_GameOverRequestSignal { get; set; }
+        [Inject] private EnableInputSignal                          m_EnableInputSignal { get; set; }
         [Inject] private IPlayer                                    m_Player { get; set; }
 
         [SerializeField] private Canvas                             m_RootCanvas;
@@ -247,7 +248,10 @@ namespace Everest.PuzzleGame
                 m_Sequence = DOTween.Sequence();
 
             m_Sequence.Insert(0f, firstTile.rectTransform.DOMove(secondTile.transform.position, 0.35f)).
-                Insert(0f, secondTile.rectTransform.DOMove(firstTile.transform.position, 0.35f)).Play();
+                Insert(0f, secondTile.rectTransform.DOMove(firstTile.transform.position, 0.35f)).Play().
+                OnComplete(() => {
+                    m_EnableInputSignal.Dispatch();
+                });
         }
 
         private void SwapTilesPosition(GridTile firstTile, GridTile secondTile)
